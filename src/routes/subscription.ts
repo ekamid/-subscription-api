@@ -29,9 +29,10 @@ export async function subscriptionRoutes(server: FastifyInstance) {
         const { email, name } = request.body;
         try {
             await db.query('INSERT INTO subscriptions (email, name) VALUES ($1, $2)', [email, name]);
-            await sendMail(email, 'Subscription Confirmed', `Hello ${name}, thank you for subscribing!`);
+            // await sendMail(email, 'Subscription Confirmed', `Hello ${name}, thank you for subscribing!`);
             reply.code(201).send({ message: 'Subscribed successfully' });
         } catch (error: any) {
+            console.log(error);
             if (error.code === '23505') { // Unique violation
                 reply.code(400).send({ message: 'Email already subscribed' });
             } else {
@@ -64,7 +65,40 @@ export async function subscriptionRoutes(server: FastifyInstance) {
     });
 
     server.get('/subscriptions', async (request, reply) => {
-        const result = await db.query('SELECT * FROM subscriptions WHERE is_unsubscribed = FALSE');
-        reply.send(result || []);
+        const { page = 1, limit = 10, sortBy = 'created_at', order = 'asc' } = request.query as {
+            page?: number;
+            limit?: number;
+            sortBy?: string;
+            order?: 'asc' | 'desc';
+        };
+
+        try {
+            // Ensure limit is a number and does not exceed a sensible maximum
+            const parsedLimit = Math.min(Math.max(Number(limit), 1), 100); // Limit to 1-100
+            const offset = (page - 1) * parsedLimit;
+
+            // Validate sortBy and order parameters
+            const validSortColumns = ['email', 'name', 'created_at']; // Adjust as needed
+            const validOrder = ['asc', 'desc'];
+            if (!validSortColumns.includes(sortBy) || !validOrder.includes(order)) {
+                return reply.code(400).send({ message: 'Invalid sort parameters' });
+            }
+
+            // Query with pagination and sorting
+            const result = await db.query(
+                `SELECT email, name, created_at 
+             FROM subscriptions 
+             WHERE is_unsubscribed = FALSE 
+             ORDER BY ${sortBy} ${order} 
+             LIMIT $1 OFFSET $2`,
+                [parsedLimit, offset]
+            );
+
+            reply.send(result.rows || []);
+        } catch (error: any) {
+            console.error(error);
+            reply.code(500).send({ message: 'Internal server error' });
+        }
     });
+
 }
