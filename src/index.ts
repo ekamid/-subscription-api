@@ -5,6 +5,7 @@ import { initRedis } from './config/redis';
 
 // Import subscription routes
 import { subscriptionRoutes } from './routes/subscription';
+import { indexRoutes } from './routes';
 
 const server = Fastify({
     logger: true
@@ -12,10 +13,12 @@ const server = Fastify({
 
 const start = async () => {
     try {
-        await initDB();
-        await initRedis();
+        // await initDB();
+        // await initRedis();
 
         // Register subscription routes
+
+        await indexRoutes(server);
         await subscriptionRoutes(server);
 
         await server.listen({ port: 3000 });

@@ -1,17 +1,29 @@
 import { FastifyInstance } from 'fastify';
-import { Type } from '@sinclair/typebox';
+import { Type, Static } from '@sinclair/typebox';
 import { db } from '../config/db';
 import { sendMail } from '../config/mailer';
 import { redis } from '../config/redis';
 
+// Define the schemas
+const SubscribeBodySchema = Type.Object({
+    email: Type.String({ format: 'email' }),
+    name: Type.String(),
+});
+
+const UnsubscribeBodySchema = Type.Object({
+    email: Type.String({ format: 'email' }),
+    reason: Type.Optional(Type.String()),
+});
+
+// Infer types for better TypeScript support
+type SubscribeBody = Static<typeof SubscribeBodySchema>;
+type UnsubscribeBody = Static<typeof UnsubscribeBodySchema>;
+
 export async function subscriptionRoutes(server: FastifyInstance) {
     // Subscribe Route
-    server.post('/subscribe', {
+    server.post<{ Body: SubscribeBody }>('/subscribe', {
         schema: {
-            body: Type.Object({
-                email: Type.String({ format: 'email' }),
-                name: Type.String()
-            })
+            body: SubscribeBodySchema,
         }
     }, async (request, reply) => {
         const { email, name } = request.body;
@@ -35,12 +47,9 @@ export async function subscriptionRoutes(server: FastifyInstance) {
     });
 
     // Unsubscribe Route
-    server.post('/unsubscribe', {
+    server.post<{ Body: UnsubscribeBody }>('/unsubscribe', {
         schema: {
-            body: Type.Object({
-                email: Type.String({ format: 'email' }),
-                reason: Type.Optional(Type.String())
-            })
+            body: UnsubscribeBodySchema,
         }
     }, async (request, reply) => {
         const { email, reason } = request.body;
