@@ -14,7 +14,7 @@ const pool = new Pool({
 export const initDB = async () => {
     const client = await pool.connect();
     try {
-        await client.query(`
+        const dbTable = await client.query(`
         CREATE TABLE IF NOT EXISTS subscriptions (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,

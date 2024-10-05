@@ -7,10 +7,11 @@ export async function indexRoutes(server: FastifyInstance) {
             author: "Ebrahim Khalil",
             repository: "https://github.com/ekamid/subscription-api",
             routes: [
-                { method: 'POST', path: '/subscribe', description: 'Subscribe to the mailing list' },
-                { method: 'GET', path: '/count', description: 'Get the count of active subscribers' },
-                { method: 'POST', path: '/unsubscribe', description: 'Unsubscribe from the mailing list' },
-                { method: 'GET', path: '/unsubscribe-reasons', description: 'Get the list of unsubscribe reasons' },
+                { method: 'GET', path: '/api/v1/subscriptions', description: 'Subscribe to the mailing list' },
+                { method: 'POST', path: '/api/v1/subscribe', description: 'Subscribe to the mailing list' },
+                { method: 'GET', path: '/api/v1/count', description: 'Get the count of active subscribers' },
+                { method: 'POST', path: '/api/v1/unsubscribe', description: 'Unsubscribe from the mailing list' },
+                { method: 'GET', path: '/api/v1/unsubscribe-reasons', description: 'Get the list of unsubscribe reasons' },
             ]
         });
     });

@@ -8,18 +8,18 @@ import { subscriptionRoutes } from './routes/subscription';
 import { indexRoutes } from './routes';
 
 const server = Fastify({
-    logger: true
+    logger: false
 }).withTypeProvider<TypeBoxTypeProvider>();
 
 const start = async () => {
     try {
-        // await initDB();
-        // await initRedis();
+        await initDB();
+        await initRedis();
 
         // Register subscription routes
-
         await indexRoutes(server);
-        await subscriptionRoutes(server);
+        server.register(subscriptionRoutes, { prefix: '/api/v1' });
+        // await subscriptionRoutes(server);
 
         await server.listen({ port: 3000 });
     } catch (err) {

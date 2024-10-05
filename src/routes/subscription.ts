@@ -62,4 +62,9 @@ export async function subscriptionRoutes(server: FastifyInstance) {
         const reasons = await redis.get('unsubscribe_reasons');
         reply.send(JSON.parse(reasons || '[]'));
     });
+
+    server.get('/subscriptions', async (request, reply) => {
+        const result = await db.query('SELECT * FROM subscriptions WHERE is_unsubscribed = FALSE');
+        reply.send(result || []);
+    });
 }
